@@ -25,7 +25,7 @@ const Sidebar = ({ view, setView }) => {
         </button>
 
         <button
-          onClick={() => setView('history-detail')}
+          onClick={() => setView('history')}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-[13px] font-medium transition-colors relative ${view === 'history' || view === 'history-detail' ? 'bg-[#1e2128] text-[#99f6e4]' : 'text-gray-400 hover:text-gray-200 hover:bg-[#1a1d24]'}`}
         >
           <History className="w-[18px] h-[18px]" />

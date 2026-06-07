@@ -29,15 +29,15 @@ ORDER BY
 
       {/* Topbar */}
       <header className="h-16 flex items-center justify-between px-8 border-b border-gray-800/50 sticky top-0 bg-[#0f1115]/90 backdrop-blur z-10">
-        <button onClick={() => onBack('chat')} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors font-medium tracking-wide uppercase">
-          <ArrowLeft className="w-4 h-4" />
+        <button onClick={() => onBack('history')} className="flex items-center gap-2 text-base text-gray-400 hover:text-white transition-colors font-medium tracking-wide uppercase">
+          <ArrowLeft className="w-5 h-5" />
           Back to History
         </button>
-        <div className="flex items-center gap-4 text-gray-400">
-          <Bell className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-          <TerminalSquare className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-          <div className="w-6 h-6 rounded bg-cyan-900/50 flex items-center justify-center border border-cyan-800">
-            <User className="w-4 h-4 text-cyan-500" />
+        <div className="flex items-center gap-5 text-gray-400">
+          <Bell className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+          <TerminalSquare className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+          <div className="w-8 h-8 rounded bg-cyan-900/50 flex items-center justify-center border border-cyan-800">
+            <User className="w-5 h-5 text-cyan-500" />
           </div>
         </div>
       </header>

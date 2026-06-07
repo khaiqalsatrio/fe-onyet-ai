@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "allowJs": true
+    "allowJs": true,
+    "noEmit": true
   },
   "include": ["src"]
 }
