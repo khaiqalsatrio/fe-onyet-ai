@@ -1,54 +1,11 @@
 import React from 'react';
-import { Bell, TerminalSquare, Plus, Search, Filter } from 'lucide-react';
+import { Bell, TerminalSquare, Plus, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
+import { useHistory } from '../hooks/useHistory';
 
 const HistoryPage = ({ onViewDetail }) => {
-  const logs = [
-    { 
-      id: 1, 
-      date: '2023.10.24 14:32', 
-      prompt: 'Optimize the following React hook for performance in a ...', 
-      category: 'OPTIMIZATION TASK',
-      categoryColor: 'text-[#34d399]', 
-      model: 'GPT-4-Turbo', 
-      modelColor: 'bg-[#60a5fa]' 
-    },
-    { 
-      id: 2, 
-      date: '2023.10.24 12:15', 
-      prompt: 'Generate a documentation template for a REST API using...', 
-      category: 'DOCUMENTATION', 
-      categoryColor: 'text-[#e879f9]',
-      model: 'Claude-3-Opus', 
-      modelColor: 'bg-[#34d399]' 
-    },
-    { 
-      id: 3, 
-      date: '2023.10.23 21:05', 
-      prompt: 'Refactor this monolith Java service into a microservices-...', 
-      category: 'REFACTORING', 
-      categoryColor: 'text-[#38bdf8]',
-      model: 'Codex-v2', 
-      modelColor: 'bg-[#3b82f6]' 
-    },
-    { 
-      id: 4, 
-      date: '2023.10.23 18:40', 
-      prompt: 'Explain the architectural differences between Event-Sour...', 
-      category: 'EXPLAINER', 
-      categoryColor: 'text-[#c084fc]',
-      model: 'GPT-4-Turbo', 
-      modelColor: 'bg-[#60a5fa]' 
-    },
-    { 
-      id: 5, 
-      date: '2023.10.23 09:12', 
-      prompt: 'Write a shell script to automate the deployment of a Doc...', 
-      category: 'DEVOPS', 
-      categoryColor: 'text-[#34d399]',
-      model: 'Gemini-Pro', 
-      modelColor: 'bg-[#34d399]' 
-    },
-  ];
+  const { logs, loading, error } = useHistory();
+
+
 
   return (
     <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -107,32 +64,58 @@ const HistoryPage = ({ onViewDetail }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60">
-                {logs.map((log) => (
-                  <tr 
-                    key={log.id} 
-                    onClick={() => onViewDetail && onViewDetail(log.id)}
-                    className="hover:bg-gray-800/30 cursor-pointer transition-colors group"
-                  >
-                    <td className="px-6 py-5 whitespace-nowrap text-gray-400 font-mono text-xs">
-                      {log.date}
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="text-gray-200 text-[15px] mb-2 font-medium">{log.prompt}</div>
-                      <div className={`text-[10px] font-bold tracking-widest uppercase ${log.categoryColor}`}>
-                        {log.category}
+                {loading ? (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Loading history...
                       </div>
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-2 h-2 rounded-full ${log.modelColor}`}></div>
-                        <span className="text-gray-300 text-xs font-mono font-medium">{log.model}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                      {/* Empty actions column for now, could add icons on hover */}
                     </td>
                   </tr>
-                ))}
+                ) : error ? (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-8 text-center">
+                      <div className="flex items-center justify-center gap-2 text-red-400">
+                        <AlertCircle className="w-5 h-5" />
+                        {error}
+                      </div>
+                    </td>
+                  </tr>
+                ) : logs.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                      No history found.
+                    </td>
+                  </tr>
+                ) : (
+                  logs.map((log) => (
+                    <tr 
+                      key={log.id} 
+                      onClick={() => onViewDetail && onViewDetail(log.id)}
+                      className="hover:bg-gray-800/30 cursor-pointer transition-colors group"
+                    >
+                      <td className="px-6 py-5 whitespace-nowrap text-gray-400 font-mono text-xs">
+                        {new Date(log.createdAt).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="text-gray-200 text-[15px] mb-2 font-medium line-clamp-1">{log.prompt}</div>
+                        <div className="text-[10px] font-bold tracking-widest uppercase text-[#34d399]">
+                          GENERATED COMMAND
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-2 h-2 rounded-full bg-[#60a5fa]"></div>
+                          <span className="text-gray-300 text-xs font-mono font-medium">{log.modelUsed || 'Unknown'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        {/* Empty actions column for now, could add icons on hover */}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

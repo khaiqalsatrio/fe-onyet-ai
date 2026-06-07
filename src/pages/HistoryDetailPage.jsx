@@ -2,27 +2,23 @@ import React from 'react';
 import {
   ArrowLeft, Bell, TerminalSquare, User, Copy, Share2,
   Archive, Trash2, MessageSquare, History, Settings,
-  FileText, HelpCircle, Zap, Activity
+  FileText, HelpCircle, Zap, Activity, Loader2, AlertCircle
 } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useHistoryDetail } from '../hooks/useHistoryDetail';
 
-const HistoryDetail = ({ onBack }) => {
-  const queryCode = `SELECT 
-    region_id, 
-    AVG(unit_price) AS avg_price, 
-    COUNT(*) AS total_transactions
-FROM 
-    transactions
-WHERE 
-    created_at >= NOW() - INTERVAL '30 days'
-    AND volume > 1000
-GROUP BY 
-    region_id
-ORDER BY 
-    avg_price DESC;
+const HistoryDetail = ({ id, onBack }) => {
+  const {
+    log,
+    loading,
+    error,
+    deleting,
+    copied,
+    handleDelete,
+    handleCopy
+  } = useHistoryDetail(id, onBack);
 
--- Result ID: onyx_7721_tx_agg`;
 
   return (
     <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -44,11 +40,25 @@ ORDER BY
 
       <div className="p-8 max-w-7xl mx-auto w-full flex-1 flex flex-col lg:flex-row gap-8">
 
-        {/* Left Column (Content) */}
-        <div className="flex-1 space-y-6">
-          <div className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-4 flex items-center gap-2">
-            History <span className="text-gray-700">&gt;</span> <span className="text-cyan-500">Detail #ID-12345</span>
+        {loading ? (
+          <div className="flex items-center justify-center py-20 text-gray-500 gap-3 w-full">
+            <Loader2 className="w-6 h-6 animate-spin" /> Loading detail...
           </div>
+        ) : error ? (
+          <div className="flex items-center justify-center py-20 text-red-400 gap-3 w-full">
+            <AlertCircle className="w-6 h-6" /> {error}
+          </div>
+        ) : !log ? (
+          <div className="flex items-center justify-center py-20 text-gray-500 w-full">
+            Detail not found.
+          </div>
+        ) : (
+          <>
+            {/* Left Column (Content) */}
+            <div className="flex-1 space-y-6">
+              <div className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-4 flex items-center gap-2">
+                History <span className="text-gray-700">&gt;</span> <span className="text-cyan-500">Detail #{id?.split('-')[0] || 'Unknown'}</span>
+              </div>
 
           {/* Original Request */}
           <div className="border border-gray-800 rounded-xl p-6 bg-[#13151a]">
@@ -57,10 +67,10 @@ ORDER BY
                 <User className="w-4 h-4 text-cyan-500" />
                 Original Request
               </div>
-              <div className="text-gray-500">Oct 27, 2023 • 14:22</div>
+              <div className="text-gray-500">{new Date(log.createdAt).toLocaleString()}</div>
             </div>
             <p className="text-gray-300 leading-relaxed text-sm md:text-base">
-              "I need a SQL query that retrieves all transactions from the last 30 days where the volume exceeds 1,000 units. Group the results by 'region_id' and show the average price per region. Sort the output by the highest average price first. Can you also explain how the indexing on 'created_at' affects this query's performance?"
+              {log.prompt}
             </p>
           </div>
 
@@ -77,16 +87,15 @@ ORDER BY
             <div className="flex justify-between items-center px-4 py-2 bg-[#13151a] border-b border-gray-800 text-xs text-gray-400">
               <div className="flex items-center gap-2 font-mono">
                 <FileText className="w-3.5 h-3.5" />
-                PostgreSQL Query
+                Generated Output
               </div>
-              <button className="flex items-center gap-1.5 hover:text-white transition-colors uppercase tracking-wider font-semibold text-[10px]">
-                <Copy className="w-3 h-3" />
-                Copy Code
+              <button onClick={handleCopy} className="flex items-center gap-1.5 hover:text-white transition-colors uppercase tracking-wider font-semibold text-[10px]">
+                {copied ? <span className="text-cyan-400">Copied!</span> : <><Copy className="w-3 h-3" /> Copy Code</>}
               </button>
             </div>
             <div className="p-0 text-sm">
               <SyntaxHighlighter
-                language="sql"
+                language="markdown"
                 style={vscDarkPlus}
                 customStyle={{
                   margin: 0,
@@ -95,7 +104,7 @@ ORDER BY
                   fontSize: '0.85rem',
                 }}
               >
-                {queryCode}
+                {log.result || "No content available."}
               </SyntaxHighlighter>
             </div>
           </div>
@@ -133,23 +142,23 @@ ORDER BY
             <div className="space-y-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Created</span>
-                <span className="text-gray-200 font-mono text-xs">2023-10-27</span>
+                <span className="text-gray-200 font-mono text-xs">{log ? new Date(log.createdAt).toLocaleDateString() : '-'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Latency</span>
-                <span className="text-cyan-400 font-mono text-xs">1.24s</span>
+                <span className="text-cyan-400 font-mono text-xs">Unknown</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Tokens used</span>
-                <span className="text-gray-200 font-mono text-xs">1,024</span>
+                <span className="text-gray-200 font-mono text-xs">{log?.tokensUsed || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Model</span>
-                <span className="text-gray-200 font-mono text-xs">Onyet v2.0-L</span>
+                <span className="text-gray-200 font-mono text-xs">{log?.modelUsed || 'Unknown'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Temperature</span>
-                <span className="text-gray-200 font-mono text-xs">0.2 (Strict)</span>
+                <span className="text-gray-200 font-mono text-xs">Default</span>
               </div>
             </div>
 
@@ -187,13 +196,19 @@ ORDER BY
               <Archive className="w-4 h-4" />
               Archive Thread
             </button>
-            <button className="w-full border border-red-900/30 hover:border-red-900 text-red-500/70 hover:text-red-400 bg-[#13151a] hover:bg-red-950/20 text-xs tracking-widest uppercase font-semibold py-3 rounded flex items-center justify-center gap-2 transition-all">
-              <Trash2 className="w-4 h-4" />
-              Delete Record
+            <button 
+              onClick={handleDelete}
+              disabled={deleting || !log}
+              className="w-full border border-red-900/30 hover:border-red-900 text-red-500/70 hover:text-red-400 bg-[#13151a] hover:bg-red-950/20 text-xs tracking-widest uppercase font-semibold py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              {deleting ? 'Deleting...' : 'Delete Record'}
             </button>
           </div>
 
         </div>
+        </>
+        )}
 
       </div>
 

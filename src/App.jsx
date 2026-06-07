@@ -8,6 +8,7 @@ import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const [view, setView] = useState('chat'); // 'chat' | 'history' | 'history-detail' | 'settings'
+  const [selectedLogId, setSelectedLogId] = useState(null);
 
   return (
     <div className="flex h-screen bg-[#111318] text-gray-200 font-sans selection:bg-[#99f6e4]/30">
@@ -17,9 +18,12 @@ function App() {
         {view === 'chat' && <Header />}
 
         {view === 'history-detail' ? (
-          <HistoryDetailPage onBack={(v) => setView(v)} />
+          <HistoryDetailPage 
+            id={selectedLogId}
+            onBack={(v) => { setView(v); setSelectedLogId(null); }} 
+          />
         ) : view === 'history' ? (
-          <HistoryPage onViewDetail={(id) => setView('history-detail')} />
+          <HistoryPage onViewDetail={(id) => { setSelectedLogId(id); setView('history-detail'); }} />
         ) : view === 'chat' ? (
           <ChatPage />
         ) : view === 'settings' ? (
