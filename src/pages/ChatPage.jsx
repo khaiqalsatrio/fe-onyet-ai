@@ -43,7 +43,7 @@ const ChatPage = () => {
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto p-8 flex justify-center">
+      <div className="flex-1 overflow-y-auto p-8 flex justify-center min-h-0">
         <div className="w-full max-w-4xl flex flex-col gap-8 pb-32">
           
           {/* User Message Example / Current Prompt Display */}
