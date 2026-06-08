@@ -14,6 +14,15 @@ const ChatPage = () => {
   } = useChat();
 
   const [copiedId, setCopiedId] = React.useState(null);
+  const messagesEndRef = React.useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   const handleCopy = (id, text) => {
     navigator.clipboard.writeText(text);
@@ -83,7 +92,7 @@ const ChatPage = () => {
   return (
     <>
       <div className="flex-1 overflow-y-auto p-8 flex justify-center min-h-0">
-        <div className="w-full max-w-4xl flex flex-col gap-8 pb-32">
+        <div className="w-full max-w-4xl flex flex-col gap-8">
           
           {/* Welcome Message / Initial State */}
           {messages.length === 0 && !loading && (
@@ -167,6 +176,9 @@ const ChatPage = () => {
                </div>
             </div>
           )}
+
+          {/* Dummy element for auto-scroll */}
+          <div ref={messagesEndRef} className="h-32 shrink-0" />
         </div>
       </div>
 
